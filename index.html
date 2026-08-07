@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IMDb Top 250 Randomizer</title>
+    <meta
+      name="description"
+      content="Spin a wheel to pick a film from the IMDb Top 250, track what you've watched, and see your progress."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🎬</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1 class="site-title">Top 250 Randomizer</h1>
+      <p class="tagline">
+        Spin for something to watch. Mark it watched and it never comes round again.
+      </p>
+      <p class="storage-warning" id="storage-warning" hidden>
+        This browser is blocking site storage, so your watched list will reset when you leave.
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel--wheel" aria-labelledby="wheel-heading">
+        <h2 class="panel__title" id="wheel-heading">The wheel</h2>
+        <div class="wheel-wrap">
+          <svg class="wheel" viewBox="0 0 400 400" aria-hidden="true"></svg>
+          <button class="spin-btn" type="button" id="spin">
+            <span class="spin-btn__label">Spin</span>
+          </button>
+        </div>
+        <p class="wheel-status" id="wheel-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel panel--result" aria-labelledby="result-heading" id="result-panel" hidden>
+        <h2 class="panel__title" id="result-heading">Your pick</h2>
+        <article class="result">
+          <div class="result__poster-wrap">
+            <img class="result__poster" id="result-poster" alt="" width="200" height="296" />
+            <span class="result__poster-fallback" id="result-poster-fallback" hidden></span>
+          </div>
+          <div class="result__body">
+            <h3 class="result__title" id="result-title"></h3>
+            <p class="result__meta">
+              <span class="rating" id="result-rating"></span>
+              <span class="result__year" id="result-year"></span>
+            </p>
+            <ul class="chips chips--static" id="result-genres"></ul>
+            <p class="result__directors" id="result-directors"></p>
+            <p class="result__plot" id="result-plot"></p>
+            <div class="result__actions">
+              <button class="toggle-btn" type="button" id="result-watched" aria-pressed="false">
+                Mark as watched
+              </button>
+              <a class="imdb-link" id="result-link" href="#" target="_blank" rel="noopener">
+                View on IMDb
+              </a>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div class="layout__side">
+        <section class="panel panel--stats" aria-labelledby="stats-heading">
+        <h2 class="panel__title" id="stats-heading">Progress</h2>
+        <div class="chart-root" id="chart-root"></div>
+        <p class="stats-note" id="stats-note"></p>
+      </section>
+
+      <section class="panel panel--filters" aria-labelledby="filters-heading">
+        <div class="panel__header">
+          <h2 class="panel__title" id="filters-heading">Filters</h2>
+          <button class="link-btn" type="button" id="clear-filters" hidden>Clear all</button>
+        </div>
+        <fieldset class="filter-group">
+          <legend class="filter-group__legend">Genre</legend>
+          <ul class="chips" id="genre-filters"></ul>
+        </fieldset>
+        <fieldset class="filter-group">
+          <legend class="filter-group__legend">Decade</legend>
+          <ul class="chips" id="decade-filters"></ul>
+        </fieldset>
+        </section>
+      </div>
+
+
+      <section class="panel panel--browse" aria-labelledby="browse-heading">
+        <h2 class="panel__title" id="browse-heading">Browse</h2>
+        <div class="tabs" role="tablist" aria-label="Browse films">
+          <button
+            class="tab"
+            type="button"
+            role="tab"
+            id="tab-history"
+            aria-controls="tabpanel-history"
+            aria-selected="true"
+          >
+            Watched history
+          </button>
+          <button
+            class="tab"
+            type="button"
+            role="tab"
+            id="tab-grid"
+            aria-controls="tabpanel-grid"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            All 250
+          </button>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tabpanel-history" aria-labelledby="tab-history">
+          <ul class="history" id="history"></ul>
+          <p class="empty-note" id="history-empty">
+            Nothing watched yet. Spin the wheel to get started.
+          </p>
+        </div>
+        <div
+          class="tabpanel"
+          role="tabpanel"
+          id="tabpanel-grid"
+          aria-labelledby="tab-grid"
+          hidden
+        >
+          <ul class="grid" id="grid"></ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        Data from the IMDb Top 250, baked into this site at build time. Your watched list lives
+        only in this browser — clearing site data resets it to zero.
+      </p>
+    </footer>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
