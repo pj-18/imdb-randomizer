@@ -1,0 +1,95 @@
+name: Refresh Movies Dataset
+
+on:
+  schedule:
+    # Daily at 00:00 UTC
+    - cron: '0 0 * * *'
+
+  # Allow manual triggering via Actions tab (useful for testing)
+  workflow_dispatch:
+
+# Restrict token permissions to minimum required: push to repository
+permissions:
+  contents: write
+
+jobs:
+  refresh-movies:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Clone repository, checking out main branch
+      # (Important: don't default to feature branch)
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # Step 2: Set up Node.js 18+ environment
+      # Script uses native fetch API (Node 18+) and built-in modules only
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # Step 3: Configure git user for commits
+      # GitHub Actions bot account creates clear audit trail
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Step 4: Run the fetch script
+      # Script validates exactly 250 entries; exits 1 on any error
+      # Outputs go to stdout/stderr for workflow logs
+      - name: Fetch IMDb Top 250 dataset
+        run: node scripts/fetch-top250.mjs
+
+      # Step 5: Detect if movies.json changed
+      # Uses git diff --quiet: exit 0 if no changes, 1 if changes detected
+      # Captures result in step output for conditional downstream steps
+      - name: Detect changes to movies.json
+        id: changes
+        run: |
+          if git diff --quiet movies.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "✓ Dataset is unchanged (no commit needed)"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✓ Dataset updated, details:"
+            git diff --stat movies.json
+          fi
+
+      # Step 6: Commit changes (only if movies.json changed)
+      # Conditional execution prevents empty commits
+      # Commit message follows conventional commits pattern
+      - name: Commit updated dataset
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git add movies.json
+          git commit -m "chore: refresh IMDb Top 250 dataset
+
+          Automated daily refresh via GitHub Actions"
+
+      # Step 7: Push to main
+      # Only runs if commit succeeded (previous step ran)
+      # Uses default GITHUB_TOKEN with repository scope
+      - name: Push to main
+        if: steps.changes.outputs.changed == 'true'
+        run: git push
+
+      # Step 8: Provide workflow summary (visible in Actions UI)
+      # Always runs, even if other steps fail, to document outcome
+      - name: Add workflow summary
+        if: always()
+        run: |
+          echo "## 🎬 Movies Dataset Refresh" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.changes.outputs.changed }}" = "true" ]; then
+            echo "✅ **Dataset Updated and Pushed**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The IMDb Top 250 dataset has been refreshed and committed to main." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **No Changes**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The IMDb Top 250 dataset hasn't changed since the last run." >> $GITHUB_STEP_SUMMARY
+          fi
