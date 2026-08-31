@@ -10,7 +10,7 @@ The site is plain static files at the repository root, so Pages serves it as-is:
 
 **Settings → Pages → Source: Deploy from a branch → `main` / `/ (root)` → Save.**
 
-It will be live at `https://<owner>.github.io/imdb-randomizer/` within a minute or so. All paths
+It will be live at `https://pj-18.github.io/imdb-randomizer/` within a minute or so. All paths
 are relative, so the project-subpath URL works without configuration. To preview before merging,
 point Pages at the feature branch instead.
 
